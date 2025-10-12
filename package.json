@@ -1,0 +1,24 @@
+{
+  "name": "payslip-generator",
+  "private": true,
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Payslip Generator",
+  "author": "Mamunur Rashid",
+  "license": "MIT",
+  "metadata": "./metadata.json",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "nuxt": "^4.1.3",
+    "vue": "latest"
+  },
+  "devDependencies": {
+    "@nuxtjs/tailwindcss": "^6.14.0"
+  }
+}
