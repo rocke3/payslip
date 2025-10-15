@@ -10,21 +10,21 @@ interface Earning {
 const data = reactive({
   company: {
     logo: "",
-    name: "Enter Company Name",
-    address: "Enter Company Address",
-    email: "Enter Company Email",
+    name: "Palmy Incorporated",
+    address: "300 Lenora Street, Suite #6135, Seattle, WA 98121, USA",
+    email: "admin@palmy.io",
   },
   payslip: {
-    title: "Payslip",
-    date: "Enter Issue Date",
+    title: "PAYSLIP",
+    date: "12 Sep 2025",
     pay: {
       title: "Pay Date",
-      date: "Enter Pay Date",
+      date: "12 Sep 2025",
     },
     period: {
       title: "Pay Period",
-      start: "Enter Start Date",
-      end: "Enter End Date",
+      start: "12 Sep 2025",
+      end: "12 Sep 2025",
     },
     net: {
       title: "Net Pay",
@@ -32,14 +32,14 @@ const data = reactive({
   },
   employee: {
     title: "Employee Information",
-    name: "Enter Employee Name",
-    address: "Enter Employee Address",
-    phone: "+880 1723 xxx xxx",
+    name: "Mamunur Rashid",
+    address: "Borshijura, Moulvibazar Sadar-3200, Sylhet, Bangladesh",
+    phone: "+880 1723 920 167",
   },
   bank: {
     title: "Bank Details",
-    name: "Enter Bank Name",
-    account: "Enter Bank Account Number",
+    name: "BRAC Bank PLC",
+    account: "1074946110001",
   },
   earning: {
     title: "Earnings Breakdown",
@@ -61,13 +61,13 @@ const data = reactive({
   },
   issuedBy: {
     title: "Issued By",
-    name: "Enter Issued By",
-    email: "Enter Email",
+    name: "Cole Plouck, CEO",
+    email: "cole@palmy.io",
   },
   footer: {
     title:
       "This is an electronically generated Payslip. No signature or stamp is required.",
-    copyRight: "Copyright © 2025",
+    copyRight: "© Palmy Incorporated. All rights reserved.",
   },
 });
 
@@ -81,8 +81,8 @@ const removeEarningRow = (index: number) => {
   }
 };
 const primaryColor = ref("#2563eb");
-const secondaryColor = ref("#f9f3f4");
-const border = ref("#f9f3f4");
+const secondaryColor = ref("#f1f1f1");
+const border = ref("#f2f2f2");
 
 const totalEarnings = computed(() => {
   return data.earnings.reduce((acc, item) => acc + Number(item.value || 0), 0);
@@ -110,6 +110,17 @@ const print = () => {
   <div>
     <div class="no-print">
       <div class="flex flex-col gap-2 fixed bottom-5 right-5">
+        <div
+          class="block size-12 rounded-lg overflow-hidden cursor-help hover:scale-110 transition-all duration-200 border border-purple-400 shadow-xl"
+        >
+          <Tooltip
+            text="To edit any field/text, click on it. To change color, click on the color picker below or settings."
+          >
+            <span class="text-4xl font-bold text-center block w-full p-1"
+              >?</span
+            >
+          </Tooltip>
+        </div>
         <div
           class="block size-12 rounded-lg overflow-hidden cursor-pointer hover:scale-110 transition-all duration-200 border border-purple-400 shadow-xl"
         >
@@ -401,7 +412,7 @@ const print = () => {
                 <tr
                   v-for="(item, index) in data.earnings"
                   :key="index"
-                  class="bg-white border-b last:border-b-0 hover:bg-secondary group theme-border"
+                  class="bg-white border-b last:border-b-0 hover:bg-slate-50 group theme-border"
                 >
                   <td class="tblCol">
                     <Editable
@@ -482,7 +493,7 @@ const print = () => {
               class="text-sm font-semibold text-slate-500 uppercase tracking-wider border-b pb-1 mb-1 theme-border rounded-none"
             />
             <div class="text-slate-700 text-sm">
-              <div class="font-bold text-slate-800 text-base">
+              <div class="font-semibold text-slate-600 text-base">
                 <Editable as="span" v-model="data.issuedBy.name" />
               </div>
               <p>{{ data.company.name }}</p>

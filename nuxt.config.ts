@@ -9,4 +9,8 @@ export default defineNuxtConfig({
       title: "Interactive Professional Payslip",
     },
   },
+  ui: {
+    colorMode: false,
+    darkMode: false,
+  },
 });

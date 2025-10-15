@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import type { tooltip } from "#build/ui";
-
 const props = defineProps({
   text: {
     type: String,
