@@ -137,7 +137,6 @@ const onPeriodEndChange = (e: Event) => {
 <template>
   <div class="text-slate-600">
     <div :class="setting.fontFamily">
-      {{ title }}
       <Transition name="help-slide">
         <div v-if="info.showInfo" class="no-print fixed top-0 left-0 z-50 w-full p-3">
           <div
@@ -161,7 +160,8 @@ const onPeriodEndChange = (e: Event) => {
               <div class="flex items-start gap-3">
                 <UIcon name="i-lucide-palette" class="size-4 text-blue-500 mt-0.5 shrink-0" />
                 <p class="text-sm text-slate-600">Use the <strong class="text-slate-700">color pickers</strong> or
-                  <strong class="text-slate-700">settings</strong> icon to change theme</p>
+                  <strong class="text-slate-700">settings</strong> icon to change theme
+                </p>
               </div>
               <div class="flex items-start gap-3">
                 <UIcon name="i-lucide-type" class="size-4 text-blue-500 mt-0.5 shrink-0" />
