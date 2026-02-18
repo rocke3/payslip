@@ -2,15 +2,18 @@
 export default defineNuxtConfig({
   compatibilityDate: "2025-07-15",
   devtools: { enabled: true },
-  modules: ["@nuxt/eslint", "@nuxt/ui"],
+  modules: ["@nuxt/eslint", "@nuxt/ui", "@nuxt/fonts"],
   css: ["~/assets/css/main.css"],
   app: {
     head: {
       title: "Interactive Professional Payslip",
+      link: [
+        {
+          rel: "icon",
+          type: "image/svg+xml",
+          href: "/icon.svg",
+        },
+      ],
     },
-  },
-  ui: {
-    colorMode: false,
-    darkMode: false,
   },
 });

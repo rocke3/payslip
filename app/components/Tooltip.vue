@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const props = defineProps({
+defineProps({
   text: {
     type: String,
     required: true,
@@ -10,13 +10,15 @@ const props = defineProps({
 <template>
   <UTooltip
     arrow
-    :delayDuration="100"
-    :text="text"
+    :delay-duration="100"
     :content="{
       side: 'left',
       sideOffset: 2,
     }"
   >
+    <template #content>
+      <div class="bg-white p-2 rounded shadow" v-html="text" />
+    </template>
     <slot />
   </UTooltip>
 </template>
