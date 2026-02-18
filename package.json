@@ -11,12 +11,12 @@
   },
   "dependencies": {
     "@nuxt/eslint": "1.15.1",
-    "@nuxt/fonts": "0.11.4",
-    "@nuxt/ui": "4.0.1",
-    "eslint": "^9.37.0",
-    "nuxt": "^4.1.3",
+    "@nuxt/fonts": "0.14.0",
+    "@nuxt/ui": "4.4.0",
+    "eslint": "^10.0.0",
+    "nuxt": "^4.3.1",
     "typescript": "5.9.3",
-    "vue": "^3.5.22",
+    "vue": "^3.5.28",
     "vue-cropperjs": "^5.0.0",
     "vue-router": "5.0.2"
   }
