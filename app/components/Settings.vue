@@ -101,10 +101,15 @@ const isDark = computed({
               class="fab-btn bg-slate-700 hover:bg-slate-800"
               @click="isDark = !isDark"
             >
-              <UIcon
-                :name="isDark ? 'i-lucide-sun' : 'i-lucide-moon'"
-                class="size-4"
-              />
+              <ClientOnly>
+                <UIcon
+                  :name="isDark ? 'i-lucide-sun' : 'i-lucide-moon'"
+                  class="size-4"
+                />
+                <template #fallback>
+                  <UIcon name="i-lucide-moon" class="size-4" />
+                </template>
+              </ClientOnly>
             </button>
           </Tooltip>
           <Tooltip text="Quick Guide">
@@ -225,13 +230,28 @@ const isDark = computed({
                 @click="isDark = !isDark"
               >
                 <div class="flex items-center gap-3">
-                  <UIcon
-                    :name="isDark ? 'i-lucide-sun' : 'i-lucide-moon'"
-                    class="size-5 text-slate-600"
-                  />
-                  <span class="text-sm font-medium text-slate-700">{{ isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode' }}</span>
+                  <ClientOnly>
+                    <UIcon
+                      :name="isDark ? 'i-lucide-sun' : 'i-lucide-moon'"
+                      class="size-5 text-slate-600"
+                    />
+                    <template #fallback>
+                      <UIcon name="i-lucide-moon" class="size-5 text-slate-600" />
+                    </template>
+                  </ClientOnly>
+                  <ClientOnly>
+                    <span class="text-sm font-medium text-slate-700">{{ isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode' }}</span>
+                    <template #fallback>
+                      <span class="text-sm font-medium text-slate-700">Switch to Dark Mode</span>
+                    </template>
+                  </ClientOnly>
                 </div>
-                <div class="size-5 rounded-full" :class="isDark ? 'bg-slate-700' : 'bg-amber-400'" />
+                <ClientOnly>
+                  <div class="size-5 rounded-full" :class="isDark ? 'bg-slate-700' : 'bg-amber-400'" />
+                  <template #fallback>
+                    <div class="size-5 rounded-full bg-amber-400" />
+                  </template>
+                </ClientOnly>
               </button>
             </div>
 

@@ -659,7 +659,8 @@ const onPeriodEndChange = (e: Event) => {
   }
 
   @page {
-    margin: 20mm;
+    size: A4;
+    margin: 0;
   }
 
   body {
