@@ -1,7 +1,21 @@
 import { useState } from "nuxt/app";
+import { watch, onMounted } from "vue";
 
 const formatDate = (d: Date): string => {
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
   return `${String(d.getDate()).padStart(2, "0")} ${months[d.getMonth()]} ${d.getFullYear()}`;
 };
 
@@ -31,13 +45,36 @@ const getPayPeriod = (): { start: string; end: string } => {
   }
 };
 
+const STORAGE_KEYS = ["payslipData", "setting"] as const;
+
+function usePersistedState<T>(key: string, defaultFn: () => T) {
+  const state = useState(key, defaultFn);
+
+  onMounted(() => {
+    const saved = localStorage.getItem(key);
+    if (saved) {
+      try {
+        state.value = JSON.parse(saved) as T;
+      } catch {}
+    }
+    watch(
+      state,
+      (val) => {
+        localStorage.setItem(key, JSON.stringify(val));
+      },
+      { deep: true },
+    );
+  });
+
+  return state;
+}
+
 export const usePayslipData = () => {
-  return useState("payslipData", () => ({
+  return usePersistedState("payslipData", () => ({
     company: {
-      logo: "./palmy.png",
-      name: "Palmy Incorporated",
-      address:
-        "300 Lenora Street, Suite #6135, Seattle\nWA 98121, USA\nadmin@palmy.io",
+      logo: "./logo.svg",
+      name: "Acme Corporation",
+      address: "123 Business Avenue, Suite #100\nNew York, NY 10001, USA\nhr@acmecorp.com",
     },
     payslip: {
       title: "PAYSLIP",
@@ -56,29 +93,28 @@ export const usePayslipData = () => {
     },
     employee: {
       title: "Employee Information",
-      name: "Mamunur Rashid, Software Engineer",
-      address:
-        "Borshijura, Moulvibazar Sadar - 3200\nSylhet, Bangladesh\n+880 1723 920 167",
+      name: "John Smith, Software Engineer",
+      address: "456 Elm Street, Apt 7B\nBrooklyn, NY 11201, USA\n+1 (555) 123-4567",
     },
     bank: {
       title: "Bank Details",
-      info: "Bank Name: BRAC Bank PLC\nAccount Holder: MD. MAMUNUR RASHID \nAccount No: 1074946110001\nBranch: Moulvibazar",
+      info: "Bank Name: First National Bank\nAccount Holder: JOHN SMITH\nAccount No: 9876543210\nBranch: Downtown",
       data: [
         {
           label: "Bank Name",
-          value: "BRAC Bank PLC",
+          value: "First National Bank",
         },
         {
           label: "Account Holder",
-          value: "MD. MAMUNUR RASHID",
+          value: "JOHN SMITH",
         },
         {
           label: "Account No",
-          value: "1074946110001",
+          value: "9876543210",
         },
         {
           label: "Branch",
-          value: "Moulvibazar",
+          value: "Downtown",
         },
       ],
     },
@@ -90,7 +126,7 @@ export const usePayslipData = () => {
       total: "Total Earnings",
     },
     earnings: [
-      { name: "Base Salary (Bi-Weekly)", value: 1750 },
+      { name: "Base Salary (Bi-Weekly)", value: 2500 },
       { name: "Over Time", hours: "", value: 0 },
       { name: "Bonus", value: 0 },
     ],
@@ -101,19 +137,19 @@ export const usePayslipData = () => {
       total: "Total Deductions",
     },
     deductions: [
-      { name: "Late Entries", value: 0 },
-      { name: "Unpaid Leaves", value: 0 },
-      { name: "Income Tax", value: 0 },
+      { name: "Health Insurance", value: 150 },
+      { name: "Income Tax", value: 375 },
+      { name: "Retirement Fund", value: 125 },
     ],
     note: {
       title: "Notes",
       content:
-        "- Base Salary: USD 3,500 per month, paid bi-weekly at USD 1,750.\n- Employee is responsible for all applicable local and national taxes.\n- Bonus: USD 300 has been paid as a separate transaction.",
+        "- Base Salary: USD 5,000 per month, paid bi-weekly at USD 2,500.\n- Employee is responsible for all applicable local and national taxes.\n- Health insurance premium is deducted at the company-subsidized rate.",
     },
     issuedBy: {
       title: "Issued By",
-      name: "Cole Plouck, CEO",
-      email: "cole@palmy.io",
+      name: "Jane Doe, HR Manager",
+      email: "jane.doe@acmecorp.com",
     },
     footer:
       "This payslip is electronically generated and is valid without a physical signature or company seal.\nThis document contains confidential information and is intended solely for the employee named herein.",
@@ -121,7 +157,7 @@ export const usePayslipData = () => {
 };
 
 export const useSetting = () => {
-  return useState("setting", () => ({
+  return usePersistedState("setting", () => ({
     primaryColor: "#2563eb",
     secondaryColor: "#f1f1f1",
     border: "#f2f2f2",
@@ -134,4 +170,53 @@ export const useInfo = () => {
   return useState("info", () => ({
     showInfo: false,
   }));
+};
+
+export const resetAllData = () => {
+  for (const key of STORAGE_KEYS) {
+    localStorage.removeItem(key);
+  }
+  window.location.reload();
+};
+
+export const exportData = () => {
+  const data: Record<string, unknown> = {};
+  for (const key of STORAGE_KEYS) {
+    const val = localStorage.getItem(key);
+    if (val) data[key] = JSON.parse(val);
+  }
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "payslip-data.json";
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
+export const importData = (): Promise<void> => {
+  return new Promise((resolve) => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json";
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return resolve();
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const data = JSON.parse(ev.target?.result as string);
+          for (const key of STORAGE_KEYS) {
+            if (data[key]) localStorage.setItem(key, JSON.stringify(data[key]));
+          }
+          window.location.reload();
+        } catch {
+          window.alert("Invalid JSON file.");
+        }
+        resolve();
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  });
 };

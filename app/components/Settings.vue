@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { useSetting, useInfo } from "../composables/usePayslipData";
+import { useSetting, useInfo, resetAllData, exportData, importData } from "../composables/usePayslipData";
 const colorMode = useColorMode();
 const setting = useSetting();
 const info = useInfo();
 const open = ref(false);
 const print = () => window.print();
+const confirmReset = () => {
+  if (window.confirm("Reset all data to defaults? This cannot be undone.")) resetAllData();
+};
 
 const fonts = ref([
   {
@@ -120,7 +123,15 @@ const isDark = computed({
               <UIcon name="i-lucide-help-circle" class="size-4" />
             </button>
           </Tooltip>
-          <Tooltip text="Print / Download PDF">
+          <Tooltip text="Export JSON">
+            <button
+              class="fab-btn bg-green-600 hover:bg-green-700"
+              @click="exportData"
+            >
+              <UIcon name="i-lucide-download" class="size-4" />
+            </button>
+          </Tooltip>
+          <Tooltip text="Print / Save as PDF">
             <button
               class="fab-btn bg-blue-600 hover:bg-blue-700"
               @click="print"
@@ -269,7 +280,7 @@ const isDark = computed({
                   @click="print(); open = false"
                 >
                   <UIcon name="i-lucide-printer" class="size-4 text-blue-600" />
-                  <span class="text-sm font-medium text-slate-700">Print</span>
+                  <span class="text-sm font-medium text-slate-700">Print / Save PDF</span>
                 </button>
                 <button
                   class="flex items-center gap-2 px-4 py-3 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all cursor-pointer"
@@ -277,6 +288,27 @@ const isDark = computed({
                 >
                   <UIcon name="i-lucide-help-circle" class="size-4 text-blue-600" />
                   <span class="text-sm font-medium text-slate-700">Help Guide</span>
+                </button>
+                <button
+                  class="flex items-center gap-2 px-4 py-3 rounded-lg border border-slate-200 hover:border-green-300 hover:bg-green-50/50 transition-all cursor-pointer"
+                  @click="exportData"
+                >
+                  <UIcon name="i-lucide-download" class="size-4 text-green-600" />
+                  <span class="text-sm font-medium text-slate-700">Export JSON</span>
+                </button>
+                <button
+                  class="flex items-center gap-2 px-4 py-3 rounded-lg border border-slate-200 hover:border-amber-300 hover:bg-amber-50/50 transition-all cursor-pointer"
+                  @click="importData"
+                >
+                  <UIcon name="i-lucide-upload" class="size-4 text-amber-600" />
+                  <span class="text-sm font-medium text-slate-700">Import JSON</span>
+                </button>
+                <button
+                  class="flex items-center gap-2 px-4 py-3 rounded-lg border border-slate-200 hover:border-red-300 hover:bg-red-50/50 transition-all cursor-pointer"
+                  @click="confirmReset"
+                >
+                  <UIcon name="i-lucide-rotate-ccw" class="size-4 text-red-500" />
+                  <span class="text-sm font-medium text-slate-700">Reset Data</span>
                 </button>
               </div>
             </div>

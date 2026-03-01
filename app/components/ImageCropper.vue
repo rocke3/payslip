@@ -66,9 +66,12 @@ const open = ref(false);
 <template>
   <div>
     <input ref="inputFile" type="file" name="image" accept="image/*" class="hidden" @change="setImage" />
-    <div @click.prevent="showFileChooser">
+    <div class="relative inline-block cursor-pointer group" @click.prevent="showFileChooser">
       <img v-if="cropImg" class="w-auto h-12 object-contain mx-auto" :src="cropImg" alt="Cropped Image" />
       <UButton v-else>Upload Image</UButton>
+      <div class="no-print absolute -bottom-1 -right-1 size-5 rounded-full bg-blue-600 flex items-center justify-center shadow-sm opacity-70 group-hover:opacity-100 transition-opacity">
+        <UIcon name="i-lucide-camera" class="size-3 text-white" />
+      </div>
     </div>
 
     <UModal v-model:open="open" title="Crop Image" description="Upload and crop your company logo">

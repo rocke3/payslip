@@ -170,8 +170,18 @@ const onPeriodEndChange = (e: Event) => {
               </div>
               <div class="flex items-start gap-3">
                 <UIcon name="i-lucide-printer" class="size-4 text-blue-500 mt-0.5 shrink-0" />
-                <p class="text-sm text-slate-600">Click the <strong class="text-slate-700">print</strong> icon to print
-                  or download as PDF</p>
+                <p class="text-sm text-slate-600">Click <strong class="text-slate-700">print</strong> to print or save
+                  as PDF via browser print dialog</p>
+              </div>
+              <div class="flex items-start gap-3">
+                <UIcon name="i-lucide-download" class="size-4 text-blue-500 mt-0.5 shrink-0" />
+                <p class="text-sm text-slate-600"><strong class="text-slate-700">Export/Import JSON</strong> to backup
+                  or restore your payslip data</p>
+              </div>
+              <div class="flex items-start gap-3">
+                <UIcon name="i-lucide-hard-drive" class="size-4 text-blue-500 mt-0.5 shrink-0" />
+                <p class="text-sm text-slate-600">All changes are <strong class="text-slate-700">auto-saved</strong> in
+                  your browser and persist across sessions</p>
               </div>
               <div
                 class="flex items-start gap-3 sm:col-span-2 bg-amber-50 rounded-lg px-3 py-2 border border-amber-100">

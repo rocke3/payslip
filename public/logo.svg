@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" width="200" height="60">
+  <rect x="2" y="2" width="56" height="56" rx="12" fill="#2563eb"/>
+  <text x="30" y="40" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="white" text-anchor="middle">AC</text>
+  <text x="72" y="28" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#1e293b">ACME</text>
+  <text x="72" y="48" font-family="Arial, sans-serif" font-size="13" fill="#64748b" letter-spacing="2">CORPORATION</text>
+</svg>
