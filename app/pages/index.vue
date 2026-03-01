@@ -265,8 +265,8 @@ const onPeriodEndChange = (e: Event) => {
                 <Editable v-model="data.bank.title" as="h3"
                   class="font-bold uppercase tracking-wider border-b pb-1 mb-1 theme-border" />
                 <div v-for="(item, index) in data.bank.data" :key="index" class="flex">
-                  <Editable :model-value="item.label" class="font-semibold text-slate-600/90" />:
-                  <Editable :model-value="item.value" class="ms-2" />
+                  <Editable v-model="data.bank.data[index].label" class="font-semibold text-slate-600/90" />:
+                  <Editable v-model="data.bank.data[index].value" class="ms-2" />
                 </div>
               </div>
             </div>

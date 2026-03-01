@@ -98,7 +98,6 @@ export const usePayslipData = () => {
     },
     bank: {
       title: "Bank Details",
-      info: "Bank Name: First National Bank\nAccount Holder: JOHN SMITH\nAccount No: 9876543210\nBranch: Downtown",
       data: [
         {
           label: "Bank Name",
