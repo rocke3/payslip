@@ -93,10 +93,13 @@
   }
   .fab-btn:hover { transform: scale(1.1); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); }
 
-  .setting-card { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-  .setting-label { font-size: 0.75rem; font-weight: 500; color: #64748b; }
+  .setting-card { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .setting-label { font-size: 0.6875rem; font-weight: 500; color: #64748b; }
 
   .cropper-container-wrap { max-height: 350px; overflow: hidden; }
+  .logo-step-btn { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 1.75rem; height: 1.75rem; border: 1px solid #e2e8f0; border-radius: 0.375rem; color: #475569; cursor: pointer; transition: background-color .15s, border-color .15s; }
+  .logo-step-btn:hover:not(:disabled) { background: #f8fafc; border-color: #93c5fd; }
+  .logo-step-btn:disabled { opacity: .4; cursor: not-allowed; }
   .crop-tool-btn {
     display: flex;
     align-items: center;
@@ -167,10 +170,10 @@
 
   .field-select {
     width: 100%;
-    padding: 0.5rem 0.75rem;
+    padding: 0.375rem 0.625rem;
     border: 1px solid #e2e8f0;
     border-radius: 0.5rem;
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
     color: #334155;
     background-color: #fff;
     cursor: pointer;
@@ -228,7 +231,7 @@
   <div>
     <input ref="inputFile" type="file" name="image" accept="image/*" class="hidden" @change="setImage">
     <div class="relative inline-block cursor-pointer group" @click.prevent="showFileChooser">
-      <img v-if="cropImg" class="w-auto h-10 object-contain mx-auto" :src="cropImg" alt="Cropped Image">
+      <img v-if="cropImg" class="w-auto object-contain mx-auto" :style="logoStyle" :src="cropImg" alt="Cropped Image">
       <button v-else type="button" class="btn-primary">Upload Image</button>
       <div class="no-print absolute -bottom-1 -right-1 size-5 rounded-full bg-blue-600 flex items-center justify-center shadow-sm opacity-70 group-hover:opacity-100 transition-opacity">
         <iconify-icon icon="lucide:camera" class="size-3 text-white"></iconify-icon>
@@ -341,7 +344,7 @@
     <teleport to="body">
       <transition name="slide">
         <aside v-if="open" class="no-print fixed top-0 right-0 z-[90] h-full w-full max-w-sm bg-white shadow-2xl border-l border-slate-200 flex flex-col">
-          <div class="flex items-start justify-between px-5 py-4 border-b border-slate-100">
+          <div class="flex items-start justify-between px-4 py-3 border-b border-slate-100">
             <div>
               <h3 class="font-semibold text-slate-800">Settings</h3>
               <p class="text-sm text-slate-500">Customize your payslip appearance</p>
@@ -351,28 +354,28 @@
             </button>
           </div>
 
-          <div class="flex-1 overflow-y-auto px-5 py-5">
-            <div class="space-y-6">
+          <div class="flex-1 overflow-y-auto px-4 py-4">
+            <div class="space-y-3">
               <div>
-                <div class="flex items-center gap-2 mb-3">
+                <div class="flex items-center gap-2 mb-2">
                   <iconify-icon icon="lucide:palette" class="size-4 text-slate-500"></iconify-icon>
-                  <h4 class="text-sm font-semibold text-slate-700 uppercase tracking-wider">Theme Colors</h4>
+                  <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Theme Colors</h4>
                 </div>
-                <div class="grid grid-cols-3 gap-3">
+                <div class="grid grid-cols-3 gap-2">
                   <div class="setting-card">
-                    <label class="block cursor-pointer rounded-xl overflow-hidden w-full h-10 ring-1 ring-slate-200 hover:ring-blue-400 transition-all">
+                    <label class="block cursor-pointer rounded-xl overflow-hidden w-full h-8 ring-1 ring-slate-200 hover:ring-blue-400 transition-all">
                       <input v-model="setting.primaryColor" type="color" class="w-full h-12 scale-110 -mt-1 cursor-pointer">
                     </label>
                     <span class="setting-label">Primary</span>
                   </div>
                   <div class="setting-card">
-                    <label class="block cursor-pointer rounded-xl overflow-hidden w-full h-10 ring-1 ring-slate-200 hover:ring-blue-400 transition-all">
+                    <label class="block cursor-pointer rounded-xl overflow-hidden w-full h-8 ring-1 ring-slate-200 hover:ring-blue-400 transition-all">
                       <input v-model="setting.secondaryColor" type="color" class="w-full h-12 scale-110 -mt-1 cursor-pointer">
                     </label>
                     <span class="setting-label">Secondary</span>
                   </div>
                   <div class="setting-card">
-                    <label class="block cursor-pointer rounded-xl overflow-hidden w-full h-10 ring-1 ring-slate-200 hover:ring-blue-400 transition-all">
+                    <label class="block cursor-pointer rounded-xl overflow-hidden w-full h-8 ring-1 ring-slate-200 hover:ring-blue-400 transition-all">
                       <input v-model="setting.border" type="color" class="w-full h-12 scale-110 -mt-1 cursor-pointer">
                     </label>
                     <span class="setting-label">Border</span>
@@ -383,11 +386,11 @@
               <hr class="border-slate-100">
 
               <div>
-                <div class="flex items-center gap-2 mb-3">
+                <div class="flex items-center gap-2 mb-2">
                   <iconify-icon icon="lucide:type" class="size-4 text-slate-500"></iconify-icon>
-                  <h4 class="text-sm font-semibold text-slate-700 uppercase tracking-wider">Typography</h4>
+                  <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Typography</h4>
                 </div>
-                <label class="block text-sm font-medium text-slate-600 mb-1.5">Font Family</label>
+                <label class="block text-xs font-medium text-slate-500 mb-1">Font Family</label>
                 <select v-model="setting.fontFamily" class="field-select">
                   <option v-for="font in fonts" :key="font.id" :value="font.id">{{ font.label }}</option>
                 </select>
@@ -396,11 +399,47 @@
               <hr class="border-slate-100">
 
               <div>
-                <div class="flex items-center gap-2 mb-3">
-                  <iconify-icon icon="lucide:circle-dollar-sign" class="size-4 text-slate-500"></iconify-icon>
-                  <h4 class="text-sm font-semibold text-slate-700 uppercase tracking-wider">Currency</h4>
+                <div class="flex items-center gap-2 mb-2">
+                  <iconify-icon icon="lucide:image" class="size-4 text-slate-500"></iconify-icon>
+                  <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Logo</h4>
                 </div>
-                <label class="block text-sm font-medium text-slate-600 mb-1.5">Currency Symbol</label>
+                <label class="flex items-center justify-between text-xs font-medium text-slate-500 mb-1">
+                  <span>Logo Size</span>
+                  <span class="text-xs font-normal text-slate-400 tabular">{{ setting.logoHeight }}px</span>
+                </label>
+                <div class="flex items-center gap-2">
+                  <button
+                    class="logo-step-btn"
+                    title="Decrease by 1px"
+                    :disabled="setting.logoHeight <= LOGO_MIN"
+                    @click="nudgeLogo(-1)"
+                  >
+                    <iconify-icon icon="lucide:minus" class="size-3.5"></iconify-icon>
+                  </button>
+                  <input v-model.number="setting.logoHeight" type="range" :min="LOGO_MIN" :max="LOGO_MAX" step="2" class="w-full cursor-pointer accent-blue-600">
+                  <button
+                    class="logo-step-btn"
+                    title="Increase by 1px"
+                    :disabled="setting.logoHeight >= LOGO_MAX"
+                    @click="nudgeLogo(1)"
+                  >
+                    <iconify-icon icon="lucide:plus" class="size-3.5"></iconify-icon>
+                  </button>
+                  <button
+                    class="px-2.5 py-1 text-xs font-medium text-slate-600 rounded-md border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer shrink-0"
+                    @click="setting.logoHeight = 40"
+                  >Reset</button>
+                </div>
+              </div>
+
+              <hr class="border-slate-100">
+
+              <div>
+                <div class="flex items-center gap-2 mb-2">
+                  <iconify-icon icon="lucide:circle-dollar-sign" class="size-4 text-slate-500"></iconify-icon>
+                  <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Currency</h4>
+                </div>
+                <label class="block text-xs font-medium text-slate-500 mb-1">Currency Symbol</label>
                 <select v-model="setting.currency" class="field-select">
                   <option v-for="c in currencys" :key="c" :value="c">{{ c }}</option>
                 </select>
@@ -409,11 +448,11 @@
               <hr class="border-slate-100">
 
               <div>
-                <div class="flex items-center gap-2 mb-3">
+                <div class="flex items-center gap-2 mb-2">
                   <iconify-icon icon="lucide:calendar-range" class="size-4 text-slate-500"></iconify-icon>
-                  <h4 class="text-sm font-semibold text-slate-700 uppercase tracking-wider">Payment Period</h4>
+                  <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Payment Period</h4>
                 </div>
-                <label class="block text-sm font-medium text-slate-600 mb-1.5">Display Format</label>
+                <label class="block text-xs font-medium text-slate-500 mb-1">Display Format</label>
                 <select v-model="setting.payPeriodMode" class="field-select">
                   <option v-for="m in payPeriodModes" :key="m.id" :value="m.id">{{ m.label }}</option>
                 </select>
@@ -422,101 +461,154 @@
               <hr class="border-slate-100">
 
               <div>
-                <div class="flex items-center gap-2 mb-3">
+                <div class="flex items-center gap-2 mb-2">
                   <iconify-icon icon="lucide:table" class="size-4 text-slate-500"></iconify-icon>
-                  <h4 class="text-sm font-semibold text-slate-700 uppercase tracking-wider">Tables</h4>
+                  <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tables</h4>
                 </div>
                 <button
-                  class="w-full flex items-center justify-between px-4 py-3 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all cursor-pointer"
+                  class="w-full flex items-center justify-between px-3 py-2 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all cursor-pointer"
                   @click="setting.showHours = !setting.showHours"
                 >
-                  <div class="flex items-center gap-3">
-                    <iconify-icon icon="lucide:clock" class="size-5 text-slate-600"></iconify-icon>
+                  <div class="flex items-center gap-2.5">
+                    <iconify-icon icon="lucide:clock" class="size-4 text-slate-600"></iconify-icon>
                     <span class="text-sm font-medium text-slate-700">Show Hours Column</span>
                   </div>
-                  <div class="size-5 rounded-full" :class="setting.showHours ? 'bg-blue-600' : 'bg-slate-200'"></div>
+                  <div class="size-4 rounded-full" :class="setting.showHours ? 'bg-blue-600' : 'bg-slate-200'"></div>
                 </button>
+                <button
+                  class="w-full flex items-center justify-between px-3 py-2 mt-1.5 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all cursor-pointer"
+                  @click="setting.fullWidthTables = !setting.fullWidthTables"
+                >
+                  <div class="flex items-center gap-2.5 text-left">
+                    <iconify-icon icon="lucide:rows-3" class="size-4 text-slate-600 shrink-0"></iconify-icon>
+                    <span class="text-sm font-medium text-slate-700">
+                      Full Width Tables
+                      <span class="block text-xs font-normal text-slate-400">Stack compensation and withholdings</span>
+                    </span>
+                  </div>
+                  <div class="size-4 rounded-full shrink-0" :class="setting.fullWidthTables ? 'bg-blue-600' : 'bg-slate-200'"></div>
+                </button>
+                <button
+                  class="w-full flex items-center justify-between px-3 py-2 mt-1.5 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all cursor-pointer"
+                  @click="setting.showYtd = !setting.showYtd"
+                >
+                  <div class="flex items-center gap-2.5 text-left">
+                    <iconify-icon icon="lucide:sigma" class="size-4 text-slate-600 shrink-0"></iconify-icon>
+                    <span class="text-sm font-medium text-slate-700">
+                      Show YTD Column
+                      <span class="block text-xs font-normal text-slate-400">Year-to-date column on compensation</span>
+                    </span>
+                  </div>
+                  <div class="size-4 rounded-full shrink-0" :class="setting.showYtd ? 'bg-blue-600' : 'bg-slate-200'"></div>
+                </button>
+                <template v-if="setting.showYtd">
+                  <button
+                    class="w-full flex items-center justify-between px-3 py-2 mt-1.5 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all cursor-pointer"
+                    @click="setting.autoYtd = !setting.autoYtd"
+                  >
+                    <div class="flex items-center gap-2.5 text-left">
+                      <iconify-icon icon="lucide:wand-sparkles" class="size-4 text-slate-600 shrink-0"></iconify-icon>
+                      <span class="text-sm font-medium text-slate-700">
+                        Auto-fill YTD
+                        <span class="block text-xs font-normal text-slate-400">Salary x months elapsed in the year</span>
+                      </span>
+                    </div>
+                    <div class="size-4 rounded-full shrink-0" :class="setting.autoYtd ? 'bg-blue-600' : 'bg-slate-200'"></div>
+                  </button>
+                  <div v-if="setting.autoYtd" class="mt-1.5 px-3 py-2.5 rounded-lg border border-slate-200 bg-slate-50/60">
+                    <label class="block text-xs font-medium text-slate-500 mb-1">Monthly Salary ({{ setting.currency }})</label>
+                    <div class="flex items-center gap-2">
+                      <input v-model.number="setting.monthlySalary" type="number" min="0" step="any" class="field-select flex-1 tabular">
+                      <button
+                        class="px-2.5 py-2 text-xs font-medium text-slate-600 rounded-md border border-slate-200 bg-white hover:bg-slate-50 transition-colors cursor-pointer shrink-0 whitespace-nowrap"
+                        title="Copy the current total compensation"
+                        @click="setting.monthlySalary = currentCompensation"
+                      >Use current</button>
+                    </div>
+                    <p class="mt-2 text-xs text-slate-400">{{ ytdPreview }}</p>
+                  </div>
+                </template>
               </div>
 
               <hr class="border-slate-100">
 
               <div>
-                <div class="flex items-center gap-2 mb-3">
+                <div class="flex items-center gap-2 mb-2">
                   <iconify-icon icon="lucide:shield" class="size-4 text-slate-500"></iconify-icon>
-                  <h4 class="text-sm font-semibold text-slate-700 uppercase tracking-wider">Privacy</h4>
+                  <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Privacy</h4>
                 </div>
                 <button
-                  class="w-full flex items-center justify-between px-4 py-3 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all cursor-pointer"
+                  class="w-full flex items-center justify-between px-3 py-2 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all cursor-pointer"
                   @click="setting.maskAccount = !setting.maskAccount"
                 >
-                  <div class="flex items-center gap-3 text-left">
-                    <iconify-icon icon="lucide:asterisk" class="size-5 text-slate-600 shrink-0"></iconify-icon>
+                  <div class="flex items-center gap-2.5 text-left">
+                    <iconify-icon icon="lucide:asterisk" class="size-4 text-slate-600 shrink-0"></iconify-icon>
                     <span class="text-sm font-medium text-slate-700">
                       Mask Account Number
                       <span class="block text-xs font-normal text-slate-400">Turn off to edit the stored number</span>
                     </span>
                   </div>
-                  <div class="size-5 rounded-full shrink-0" :class="setting.maskAccount ? 'bg-blue-600' : 'bg-slate-200'"></div>
+                  <div class="size-4 rounded-full shrink-0" :class="setting.maskAccount ? 'bg-blue-600' : 'bg-slate-200'"></div>
                 </button>
               </div>
 
               <hr class="border-slate-100">
 
               <div>
-                <div class="flex items-center gap-2 mb-3">
+                <div class="flex items-center gap-2 mb-2">
                   <iconify-icon icon="lucide:moon" class="size-4 text-slate-500"></iconify-icon>
-                  <h4 class="text-sm font-semibold text-slate-700 uppercase tracking-wider">Appearance</h4>
+                  <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Appearance</h4>
                 </div>
                 <button
-                  class="w-full flex items-center justify-between px-4 py-3 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all cursor-pointer"
+                  class="w-full flex items-center justify-between px-3 py-2 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all cursor-pointer"
                   @click="isDark = !isDark"
                 >
-                  <div class="flex items-center gap-3">
-                    <iconify-icon :icon="isDark ? 'lucide:sun' : 'lucide:moon'" class="size-5 text-slate-600"></iconify-icon>
+                  <div class="flex items-center gap-2.5">
+                    <iconify-icon :icon="isDark ? 'lucide:sun' : 'lucide:moon'" class="size-4 text-slate-600"></iconify-icon>
                     <span class="text-sm font-medium text-slate-700">{{ isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode' }}</span>
                   </div>
-                  <div class="size-5 rounded-full" :class="isDark ? 'bg-slate-700' : 'bg-amber-400'"></div>
+                  <div class="size-4 rounded-full" :class="isDark ? 'bg-slate-700' : 'bg-amber-400'"></div>
                 </button>
               </div>
 
               <hr class="border-slate-100">
 
               <div>
-                <div class="flex items-center gap-2 mb-3">
+                <div class="flex items-center gap-2 mb-2">
                   <iconify-icon icon="lucide:zap" class="size-4 text-slate-500"></iconify-icon>
-                  <h4 class="text-sm font-semibold text-slate-700 uppercase tracking-wider">Quick Actions</h4>
+                  <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Quick Actions</h4>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-2 gap-2">
                   <button
-                    class="flex items-center gap-2 px-4 py-3 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all cursor-pointer"
+                    class="flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all cursor-pointer"
                     @click="print(); open = false"
                   >
                     <iconify-icon icon="lucide:printer" class="size-4 text-blue-600"></iconify-icon>
                     <span class="text-sm font-medium text-slate-700">Print / Save PDF</span>
                   </button>
                   <button
-                    class="flex items-center gap-2 px-4 py-3 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all cursor-pointer"
+                    class="flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all cursor-pointer"
                     @click="info.showInfo = true; open = false"
                   >
                     <iconify-icon icon="lucide:circle-help" class="size-4 text-blue-600"></iconify-icon>
                     <span class="text-sm font-medium text-slate-700">Help Guide</span>
                   </button>
                   <button
-                    class="flex items-center gap-2 px-4 py-3 rounded-lg border border-slate-200 hover:border-green-300 hover:bg-green-50/50 transition-all cursor-pointer"
+                    class="flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 hover:border-green-300 hover:bg-green-50/50 transition-all cursor-pointer"
                     @click="exportData"
                   >
                     <iconify-icon icon="lucide:download" class="size-4 text-green-600"></iconify-icon>
                     <span class="text-sm font-medium text-slate-700">Export JSON</span>
                   </button>
                   <button
-                    class="flex items-center gap-2 px-4 py-3 rounded-lg border border-slate-200 hover:border-amber-300 hover:bg-amber-50/50 transition-all cursor-pointer"
+                    class="flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 hover:border-amber-300 hover:bg-amber-50/50 transition-all cursor-pointer"
                     @click="importData"
                   >
                     <iconify-icon icon="lucide:upload" class="size-4 text-amber-600"></iconify-icon>
                     <span class="text-sm font-medium text-slate-700">Import JSON</span>
                   </button>
                   <button
-                    class="flex items-center gap-2 px-4 py-3 rounded-lg border border-slate-200 hover:border-red-300 hover:bg-red-50/50 transition-all cursor-pointer"
+                    class="flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 hover:border-red-300 hover:bg-red-50/50 transition-all cursor-pointer"
                     @click="confirmReset"
                   >
                     <iconify-icon icon="lucide:rotate-ccw" class="size-4 text-red-500"></iconify-icon>
@@ -597,7 +689,6 @@
                 <image-cropper v-model="data.company.logo"></image-cropper>
               </div>
               <editable v-model="data.statement.title" as="h2" class="text-[14px] font-bold uppercase tracking-[0.12em] text-slate-800 leading-[1.35] text-balance"></editable>
-              <editable v-model="data.statement.subtitle" as="div" class="text-[10px] uppercase tracking-[0.18em] text-slate-400 mb-2"></editable>
               <div class="flex justify-end items-baseline text-[11.5px]">
                 <editable v-model="data.statement.number.title" class="text-slate-500"></editable>:
                 <editable
@@ -697,7 +788,7 @@
               </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-8 items-start mb-4">
+            <div class="grid items-start mb-4" :class="setting.fullWidthTables ? 'grid-cols-1 gap-5' : 'grid-cols-2 gap-8'">
               <div>
                 <editable v-model="data.earning.title" as="h3" class="sec-head"></editable>
                 <div class="overflow-hidden border theme-border rounded-lg">
@@ -710,6 +801,9 @@
                           <editable v-model="data.earning.col3" as="span"></editable>
                           <span class="text-slate-400"> ({{ setting.currency }})</span>
                         </th>
+                        <th v-if="setting.showYtd" class="tblCol font-semibold text-right whitespace-nowrap">
+                          <editable v-model="data.earning.col4" as="span"></editable>
+                        </th>
                         <th class="w-8 no-print"></th>
                       </tr>
                     </thead>
@@ -718,6 +812,10 @@
                         <td class="tblCol"><editable v-model="item.name" class="font-medium text-slate-700 w-full"></editable></td>
                         <td v-if="setting.showHours" class="tblCol"><editable v-model="item.hours" type="number" class="w-full text-right"></editable></td>
                         <td class="tblCol text-right"><editable v-model="item.value" type="number" class="w-full text-right tabular"></editable></td>
+                        <td v-if="setting.showYtd" class="tblCol text-right">
+                          <span v-if="setting.autoYtd" class="tabular" :title="ytdMonths + ' month(s) of the year elapsed'">{{ formatAmount(rowYtd(item, index)) }}</span>
+                          <editable v-else v-model="item.ytd" type="number" class="w-full text-right tabular"></editable>
+                        </td>
                         <td class="tblCol text-right no-print">
                           <button
                             class="p-1 rounded-md text-red-300 hover:text-red-500 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
@@ -732,6 +830,7 @@
                       <tr class="font-semibold text-slate-800 bg-secondary">
                         <th scope="row" class="tblCol"><editable v-model="data.earning.total"></editable></th>
                         <td :colspan="setting.showHours ? 2 : 1" class="tblCol text-right tabular">{{ formatCurrency(earning) }}</td>
+                        <td v-if="setting.showYtd" class="tblCol text-right tabular">{{ formatCurrency(earningYtd) }}</td>
                         <td class="no-print"></td>
                       </tr>
                     </tfoot>
@@ -853,10 +952,9 @@
               </div>
             </div>
 
-            <div class="mb-5 grid grid-cols-[1.7fr_1fr] gap-10 items-start">
+            <div class="mt-8 mb-5 grid grid-cols-[1.7fr_1fr] gap-10 items-start">
               <div>
                 <editable v-model="data.note.title" as="h3" class="sec-head"></editable>
-                <p class="note-line">{{ scheduleNote }}</p>
                 <p v-if="showTaxNote" class="note-line">
                   <editable v-model="data.note.tax" as="span"></editable>
                 </p>
@@ -870,12 +968,6 @@
               <div>
                 <editable v-model="data.issuedBy.title" as="h3" class="sec-head"></editable>
                 <editable v-model="data.issuedBy.name" as="div" class="font-semibold text-slate-800"></editable>
-                <editable
-                  v-model="data.issuedBy.position"
-                  as="div"
-                  class="text-slate-500"
-                  :class="{ 'print-hidden': !data.issuedBy.position }"
-                ></editable>
                 <div class="text-slate-500">{{ data.company.name }}</div>
                 <editable
                   v-model="data.issuedBy.email"
@@ -1002,15 +1094,11 @@ const DEFAULT_INSTALLMENTS = 2;
    the user actually entered (names, amounts, bank details, wording) are carried
    over verbatim; only labels, terminology and containers are migrated. */
 function migrateStatementData(d) {
-  const scheduleTemplate =
-    "Paid in {count} installments of {amount}: the first between the 15th and 18th of the month, the remaining {remaining} after month end.";
-
   /* payslip -> statement */
   if (d.payslip && !d.statement) {
     const old = d.payslip;
     d.statement = {
       title: "Monthly Contractor Payment Statement",
-      subtitle: "Payslip / Payment Record",
       number: { title: "Statement No", value: "", prefix: "PCS" },
       issued: { title: "Statement Date", date: (old.pay && old.pay.date) || formatToday() },
       period: {
@@ -1026,7 +1114,7 @@ function migrateStatementData(d) {
 
   const s = d.statement;
   if (s) {
-    if (!s.subtitle) s.subtitle = "Payslip / Payment Record";
+    delete s.subtitle;
     if (!s.number) s.number = { title: "Statement No", value: "", prefix: "PCS" };
     if (!s.number.prefix) s.number.prefix = "PCS";
     if (s.number.title === "Payslip No") s.number.title = "Statement No";
@@ -1083,7 +1171,8 @@ function migrateStatementData(d) {
   /* compensation */
   const e = d.earning;
   if (e) {
-    delete e.col4;
+    /* col4 used to be a stale leftover column and was dropped here; it now
+       holds the YTD header, so an edited label must survive a reload. */
     if (/earnings/i.test(e.title || "")) e.title = "Compensation";
     if (/^earnings$/i.test(e.col1 || "")) e.col1 = "Description";
     if (/^total earnings$/i.test(e.total || "")) e.total = "Total Compensation";
@@ -1125,7 +1214,7 @@ function migrateStatementData(d) {
     const total = (d.earnings || []).reduce((acc, r) => acc + Number(r.value || 0), 0);
     d.payments = {
       title: "Payment Details",
-      col1: "Installment",
+      col1: "Payment",
       col2: "Payment Date",
       col3: "Amount",
       col4: "Payment Method",
@@ -1136,10 +1225,18 @@ function migrateStatementData(d) {
         value: total ? total / DEFAULT_INSTALLMENTS : 0,
         method: "Bank Transfer",
       })),
-      scheduleTemplate,
     };
   }
-  if (!d.payments.scheduleTemplate) d.payments.scheduleTemplate = scheduleTemplate;
+  delete d.payments.scheduleTemplate;
+  /* the column now reads "Payment"; the rows themselves are renamed at runtime */
+  if (d.payments.col1 === "Installment") d.payments.col1 = "Payment";
+
+  /* YTD is a later addition: label the column and give existing rows a value
+     so the inputs bind to a number rather than undefined. */
+  if (d.earning && !d.earning.col4) d.earning.col4 = "YTD";
+  if (d.deduction) delete d.deduction.col4;
+  if (Array.isArray(d.earnings)) d.earnings.forEach((row) => { if (row.ytd === undefined) row.ytd = 0; });
+  if (Array.isArray(d.deductions)) d.deductions.forEach((row) => { delete row.ytd; });
 
   /* notes: the old free text described a semi-monthly salary, which contradicts
      the generated schedule note, so drop it only while it is still the shipped
@@ -1153,11 +1250,13 @@ function migrateStatementData(d) {
     d.note.content = "";
   }
 
-  /* issued by */
-  if (d.issuedBy && d.issuedBy.position === undefined) {
-    const parts = String(d.issuedBy.name || "").split(",");
-    d.issuedBy.name = (parts.shift() || "").trim();
-    d.issuedBy.position = parts.join(",").trim();
+  /* issued by: the oldest documents packed "Name, Position" into one field and
+     the position is no longer shown, so keep the name and drop the rest. */
+  if (d.issuedBy) {
+    if (d.issuedBy.position === undefined) {
+      d.issuedBy.name = String(d.issuedBy.name || "").split(",")[0].trim();
+    }
+    delete d.issuedBy.position;
   }
 
   if (typeof d.footer === "string" && /payslip|employee/i.test(d.footer)) {
@@ -1175,7 +1274,6 @@ const payslipData = persisted("payslipData", {
   },
   statement: {
     title: "Monthly Contractor Payment Statement",
-    subtitle: "Payslip / Payment Record",
     number: { title: "Statement No", value: "", prefix: "PCS" },
     issued: { title: "Statement Date", date: formatToday() },
     period: { title: "Payment Period", month: currentPeriodMonth(), start: "", end: "" },
@@ -1201,7 +1299,7 @@ const payslipData = persisted("payslipData", {
       { label: "Payment Method", value: "International Bank Transfer" },
     ],
   },
-  earning: { title: "Compensation", col1: "Description", col2: "Hours", col3: "Amount", total: "Total Compensation" },
+  earning: { title: "Compensation", col1: "Description", col2: "Hours", col3: "Amount", col4: "YTD", total: "Total Compensation" },
   earnings: [
     { name: "Monthly Contract Compensation", value: DEFAULT_COMPENSATION },
   ],
@@ -1212,7 +1310,7 @@ const payslipData = persisted("payslipData", {
   ],
   payments: {
     title: "Payment Details",
-    col1: "Installment",
+    col1: "Payment",
     col2: "Payment Date",
     col3: "Amount",
     col4: "Payment Method",
@@ -1223,10 +1321,6 @@ const payslipData = persisted("payslipData", {
       value: DEFAULT_COMPENSATION / DEFAULT_INSTALLMENTS,
       method: "Bank Transfer",
     })),
-    /* {count}, {amount} and {remaining} are substituted from the live
-       compensation and installment rows so the note can never go stale. */
-    scheduleTemplate:
-      "Paid in {count} installments of {amount}: the first between the 15th and 18th of the month, the remaining {remaining} after month end.",
   },
   note: {
     title: "Payment Notes",
@@ -1236,7 +1330,6 @@ const payslipData = persisted("payslipData", {
   issuedBy: {
     title: "Issued By",
     name: "Jane Doe",
-    position: "Authorized Representative",
     email: "accounts@acmecorp.com",
   },
   footer:
@@ -1252,9 +1345,19 @@ const setting = persisted("setting", {
   payPeriodMode: "contractMonth",
   showHours: false,
   maskAccount: true,
+  logoHeight: 40,
+  fullWidthTables: false,
+  showYtd: false,
+  autoYtd: false,
+  monthlySalary: DEFAULT_COMPENSATION,
 });
 
 if (setting.maskAccount === undefined) setting.maskAccount = true;
+if (!setting.logoHeight) setting.logoHeight = 40;
+if (setting.fullWidthTables === undefined) setting.fullWidthTables = false;
+if (setting.showYtd === undefined) setting.showYtd = false;
+if (setting.autoYtd === undefined) setting.autoYtd = false;
+if (setting.monthlySalary === undefined) setting.monthlySalary = DEFAULT_COMPENSATION;
 /* The old half-month range mode cannot express a monthly compensation period,
    so move it to the full-month mode once. */
 if (!setting.periodModeMigrated) {
@@ -1397,6 +1500,8 @@ const ImageCropper = {
   emits: ["update:modelValue"],
   setup(props, { emit }) {
     const open = ref(false);
+    /* The logo scales by height only; width follows the image's own ratio. */
+    const logoStyle = computed(() => ({ height: `${setting.logoHeight || 40}px` }));
     const cropImg = ref(props.modelValue);
     const imgSrc = ref(props.modelValue);
     const inputFile = ref(null);
@@ -1414,8 +1519,11 @@ const ImageCropper = {
       if (!imgEl.value) return;
       destroy();
       cropper = new Cropper(imgEl.value, {
-        aspectRatio: 200 / 50,
-        viewMode: 1,
+        /* Free ratio and viewMode 0: logos come in every shape, and the crop
+           box must be able to hold the whole image (and zoom out past the
+           frame) instead of forcing a 4:1 slice. The payslip renders the
+           result with object-contain, so any ratio displays correctly. */
+        viewMode: 0,
         autoCropArea: 1,
       });
     };
@@ -1451,10 +1559,10 @@ const ImageCropper = {
 
     const rotate = (deg) => cropper && cropper.rotate(deg);
     const reset = () => cropper && cropper.reset();
-    const zoom = (percent) => cropper && cropper.relativeZoom(percent);
+    const zoom = (percent) => cropper && cropper.zoom(percent);
     const showFileChooser = () => inputFile.value && inputFile.value.click();
 
-    return { open, cropImg, imgSrc, inputFile, imgEl, setImage, close, cropImage, rotate, reset, zoom, showFileChooser };
+    return { open, cropImg, imgSrc, inputFile, imgEl, logoStyle, setImage, close, cropImage, rotate, reset, zoom, showFileChooser };
   },
 };
 
@@ -1465,6 +1573,24 @@ const AppSettings = {
   components: { Tooltip },
   setup() {
     const open = ref(false);
+
+    /* The panel previews the YTD maths, so it reads the same shared stores the
+       document does rather than taking them as props. */
+    const currentCompensation = computed(() =>
+      payslipData.earnings.reduce((acc, item) => acc + Number(item.value || 0), 0));
+
+    const ytdMonths = computed(() => {
+      const month = parseInt(String(payslipData.statement.period.month || "").split("-")[1], 10);
+      return month || 0;
+    });
+
+    const ytdPreview = computed(() => {
+      const salary = Number(setting.monthlySalary || 0);
+      const months = ytdMonths.value;
+      if (!months) return "Select a payment period to calculate YTD.";
+      const money = (n) => `${setting.currency} ${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)}`;
+      return `${money(salary)} x ${months} month${months > 1 ? "s" : ""} = ${money(salary * months)}`;
+    });
 
     const fonts = [
       { label: "Open Sans", id: "fontOpenSans" },
@@ -1495,7 +1621,15 @@ const AppSettings = {
       if (window.confirm("Reset all data to defaults? This cannot be undone.")) resetAllData();
     };
 
-    return { setting, info, open, fonts, currencys, payPeriodModes, isDark, print, confirmReset, exportData, importData };
+    /* The slider moves in 2px steps; the -/+ buttons allow 1px nudges. */
+    const LOGO_MIN = 20;
+    const LOGO_MAX = 120;
+    const nudgeLogo = (delta) => {
+      const next = Number(setting.logoHeight || 40) + delta;
+      setting.logoHeight = Math.min(LOGO_MAX, Math.max(LOGO_MIN, next));
+    };
+
+    return { setting, info, open, fonts, currencys, payPeriodModes, isDark, print, confirmReset, exportData, importData, nudgeLogo, LOGO_MIN, LOGO_MAX, currentCompensation, ytdMonths, ytdPreview };
   },
 };
 
@@ -1509,6 +1643,8 @@ const App = {
 
     const earning = computed(() => data.earnings.reduce((acc, item) => acc + Number(item.value || 0), 0));
     const deduction = computed(() => data.deductions.reduce((acc, item) => acc + Number(item.value || 0), 0));
+    /* Year-to-date figures are entered per row, not derived: this document only
+       knows about one period, so the running total has to come from the user. */
     const netCompensation = computed(() => earning.value - deduction.value);
     const totalPaid = computed(() => data.payments.rows.reduce((acc, row) => acc + Number(row.value || 0), 0));
 
@@ -1536,6 +1672,20 @@ const App = {
       if (!p) return "";
       return `${formatDateLong(p.year, p.month, 1)} – ${formatDateLong(p.year, p.month, lastDayOfMonth(p.year, p.month))}`;
     });
+
+    /* Months of the year covered by this statement: a September period means
+       nine monthly payments have been made, January through September. */
+    const ytdMonths = computed(() => (periodParts.value ? periodParts.value.month : 0));
+
+    /* The saved monthly salary drives the first compensation row, which is the
+       recurring one; any extra rows fall back to their own amount. */
+    const rowYtd = (item, index) => {
+      if (!setting.autoYtd) return Number(item.ytd || 0);
+      const monthly = index === 0 ? Number(setting.monthlySalary || 0) : Number(item.value || 0);
+      return monthly * ytdMonths.value;
+    };
+
+    const earningYtd = computed(() => data.earnings.reduce((acc, item, index) => acc + rowYtd(item, index), 0));
 
     // Keep the plain start/end strings in step with the selected month so the
     // other period modes (and exported JSON) stay coherent.
@@ -1593,11 +1743,24 @@ const App = {
 
     // Deterministic and derived from the period, so re-opening the same month
     // always yields the same number. An edited value is kept verbatim.
+    // The prefix is the contractor's initials ("John Smith" -> "JS"), falling
+    // back to the stored prefix while the name is still empty.
+    const statementPrefix = computed(() => {
+      const initials = String(data.contractor.name || "")
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean)
+        .map((word) => word[0])
+        .join("")
+        .toUpperCase();
+      return initials || data.statement.number.prefix || "PCS";
+    });
+
     const autoStatementNo = computed(() => {
       const p = periodParts.value;
-      const prefix = data.statement.number.prefix || "PCS";
+      const prefix = statementPrefix.value;
       if (!p) return prefix;
-      return `${prefix}-${p.year}-${String(p.month).padStart(2, "0")}`;
+      return `${prefix}${p.year}${String(p.month).padStart(2, "0")}`;
     });
 
     const statementNo = computed(() => data.statement.number.value || autoStatementNo.value);
@@ -1609,10 +1772,36 @@ const App = {
 
     /* ------------------------------------------------------- installments */
 
+    /* Rows are named after the period they belong to ("September Payment #1").
+       The name stays editable: only names still matching the generated shape
+       (or the old "Installment n" default) are rewritten when the period or
+       the row order changes, so a hand-written label is never clobbered. */
+    const autoPaymentName = (index) => {
+      const p = periodParts.value;
+      const month = p ? MONTHS_LONG[p.month - 1] : "";
+      return month ? `${month} Payment #${index + 1}` : `Payment #${index + 1}`;
+    };
+
+    const isAutoPaymentName = (name) => {
+      const text = String(name || "").trim();
+      if (!text) return true;
+      if (/^Installment \d+$/i.test(text)) return true;
+      const months = MONTHS_LONG.join("|");
+      return new RegExp(`^(?:(?:${months}) )?Payment #\\d+$`, "i").test(text);
+    };
+
+    const renamePayments = () => {
+      data.payments.rows.forEach((row, index) => {
+        if (isAutoPaymentName(row.name)) row.name = autoPaymentName(index);
+      });
+    };
+
+    watch(() => [data.statement.period.month, data.payments.rows.length], renamePayments, { immediate: true });
+
     const addInstallmentRow = () => {
       const rows = data.payments.rows;
       const remaining = Math.max(netCompensation.value - totalPaid.value, 0);
-      rows.push({ name: `Installment ${rows.length + 1}`, date: null, value: remaining, method: "Bank Transfer" });
+      rows.push({ name: autoPaymentName(rows.length), date: null, value: remaining, method: "Bank Transfer" });
     };
 
     const removeInstallmentRow = (index) => {
@@ -1637,20 +1826,6 @@ const App = {
 
     /* -------------------------------------------------------------- notes */
 
-    const scheduleNote = computed(() => {
-      const rows = data.payments.rows;
-      const count = rows.length || 1;
-      const amounts = rows.map((row) => Number(row.value || 0));
-      const uniform = amounts.every((a) => Math.abs(a - amounts[0]) < 0.005);
-      const amount = formatCurrency(uniform && amounts.length ? amounts[0] : netCompensation.value / count);
-      const template = data.payments.scheduleTemplate || "";
-      return template
-        .replace(/\{count\}/g, String(count))
-        .replace(/\{amount\}/g, amount)
-        .replace(/\{total\}/g, formatCurrency(netCompensation.value))
-        .replace(/\{remaining\}/g, count > 2 ? "installments" : "installment");
-    });
-
     // Only claim that nothing is withheld while nothing actually is.
     const showTaxNote = computed(() => deduction.value === 0 && !!data.note.tax);
 
@@ -1668,7 +1843,7 @@ const App = {
 
     /* --------------------------------------------------------------- rows */
 
-    const addEarningRow = () => data.earnings.push({ name: "New Line Item", hours: 0, value: 0 });
+    const addEarningRow = () => data.earnings.push({ name: "New Line Item", hours: 0, value: 0, ytd: 0 });
     const removeEarningRow = (index) => {
       if (index >= 0 && index < data.earnings.length) data.earnings.splice(index, 1);
     };
@@ -1697,10 +1872,10 @@ const App = {
 
     return {
       data, setting, info, cssVars,
-      earning, deduction, netCompensation, totalPaid,
+      earning, deduction, earningYtd, rowYtd, ytdMonths, netCompensation, totalPaid,
       formatCurrency, formatAmount, toISODate, toISOMonth,
       contractPeriodText, statementNo, setStatementNo,
-      scheduleNote, showTaxNote, paymentWarning, isMasked, maskAccount,
+      showTaxNote, paymentWarning, isMasked, maskAccount,
       addEarningRow, removeEarningRow, addDeductionRow, removeDeductionRow,
       addInstallmentRow, removeInstallmentRow, onInstallmentDateChange,
       onContractMonthChange, onPeriodStartChange, onPeriodEndChange, onPeriodMonthChange, onIssueDateChange,
