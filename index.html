@@ -617,6 +617,13 @@
                     <iconify-icon icon="lucide:rotate-ccw" class="size-4 text-red-500"></iconify-icon>
                     <span class="text-sm font-medium text-slate-700">Reset Data</span>
                   </button>
+                  <button
+                    class="flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 hover:border-purple-300 hover:bg-purple-50/50 transition-all cursor-pointer"
+                    @click="fixSaveData"
+                  >
+                    <iconify-icon icon="lucide:wrench" class="size-4 text-purple-600"></iconify-icon>
+                    <span class="text-sm font-medium text-slate-700">Fix Save Data</span>
+                  </button>
                 </div>
               </div>
             </div>
@@ -1174,7 +1181,6 @@ function migrateStatementData(d) {
       data: [
         { label: "Position", value: parts.join(",").trim() },
         { label: "Status", value: "Independent Contractor" },
-        { label: "Country of Residence", value: "Bangladesh" },
         { label: "Email", value: "" },
       ],
       address: old.address || "",
@@ -1189,6 +1195,10 @@ function migrateStatementData(d) {
     /* only seeded once: a deleted row must stay deleted */
     if (relabel && !c.data.some((f) => /^status$/i.test(f.label || ""))) {
       c.data.push({ label: "Status", value: "Independent Contractor" });
+    }
+    if (!done.countryRemoved) {
+      c.data = c.data.filter((f) => !/^country of residence$/i.test(f.label || ""));
+      done.countryRemoved = true;
     }
   }
 
@@ -1223,9 +1233,16 @@ function migrateStatementData(d) {
   if (dd) {
     if (!dd.col3) { dd.col3 = dd.col2 || "Amount"; dd.col2 = "Hours"; }
     if (relabel) {
-      if (/deductions/i.test(dd.title || "")) dd.title = "Withholdings";
+      if (/deductions/i.test(dd.title || "")) dd.title = "Tax & Deductions";
       if (/^(deductions|withholdings)$/i.test(dd.col1 || "")) dd.col1 = "Description";
       if (/^total deductions$/i.test(dd.total || "")) dd.total = "Total Withholdings";
+    }
+    /* "Withholdings" was the shipped heading between the payslip wording and
+       this one, so it is moved across once; anything else in the field was
+       typed by hand and is left alone. */
+    if (!done.deductionTitle) {
+      if (/^withholdings$/i.test(dd.title || "")) dd.title = "Tax & Deductions";
+      done.deductionTitle = true;
     }
   }
   if (Array.isArray(d.deductions) && relabel) {
@@ -1238,7 +1255,7 @@ function migrateStatementData(d) {
       if (/^income tax$/i.test(row.name || "")) row.name = "Tax Withheld";
     }
     if (!d.deductions.length) {
-      d.deductions = [{ name: "Tax Withheld", value: 0 }, { name: "Other Withholdings", value: 0 }];
+      d.deductions = [{ name: "Monthly Contract Compensation", value: 0 }, { name: "Other Withholdings", value: 0 }];
     }
   }
 
@@ -1332,7 +1349,6 @@ const payslipData = persisted("payslipData", {
     data: [
       { label: "Position", value: "Full-Stack Web Developer" },
       { label: "Status", value: "Independent Contractor" },
-      { label: "Country of Residence", value: "Bangladesh" },
       { label: "Email", value: "" },
     ],
     address: "",
@@ -1350,9 +1366,9 @@ const payslipData = persisted("payslipData", {
   earnings: [
     { name: "Monthly Contract Compensation", value: DEFAULT_COMPENSATION },
   ],
-  deduction: { title: "Withholdings", col1: "Description", col2: "Hours", col3: "Amount", total: "Total Withholdings" },
+  deduction: { title: "Tax & Deductions", col1: "Description", col2: "Hours", col3: "Amount", total: "Total Withholdings" },
   deductions: [
-    { name: "Tax Withheld", value: 0 },
+    { name: "Monthly Contract Compensation", value: 0 },
     { name: "Other Withholdings", value: 0 },
   ],
   payments: {
@@ -1418,6 +1434,23 @@ const info = reactive({ showInfo: false });
 
 const resetAllData = () => {
   for (const key of STORAGE_KEYS) localStorage.removeItem(key);
+  window.location.reload();
+};
+
+/* Re-run cleanup migrations against the stored document, pruning rows/fields
+   that the current UI no longer includes (e.g. a label that was removed from
+   defaults after this document was first saved). */
+const fixSaveData = () => {
+  try {
+    const raw = localStorage.getItem("payslipData");
+    if (raw) {
+      const d = JSON.parse(raw);
+      if (d && d.migrations) {
+        delete d.migrations.countryRemoved;
+        localStorage.setItem("payslipData", JSON.stringify(d));
+      }
+    }
+  } catch (e) { /* ignore malformed storage */ }
   window.location.reload();
 };
 
@@ -1698,7 +1731,7 @@ const AppSettings = {
       setting.logoHeight = Math.min(LOGO_MAX, Math.max(LOGO_MIN, next));
     };
 
-    return { setting, info, open, fonts, currencys, payPeriodModes, isDark, print, confirmReset, exportData, importData, nudgeLogo, LOGO_MIN, LOGO_MAX, currentCompensation, ytdMonths, ytdPreview };
+    return { setting, info, open, fonts, currencys, payPeriodModes, isDark, print, confirmReset, fixSaveData, exportData, importData, nudgeLogo, LOGO_MIN, LOGO_MAX, currentCompensation, ytdMonths, ytdPreview };
   },
 };
 
@@ -1979,6 +2012,20 @@ const App = {
     });
 
     watchEffect(() => { document.title = title.value; });
+
+    /* Chrome, Edge and Firefox seed the "Save as PDF" filename from the
+       document title, so the statement number stands in for the window title
+       for the duration of the print job: the file lands as "JS202609.pdf"
+       instead of "JS202609 · John Smith · September 2026.pdf". Characters no
+       filesystem accepts are dropped, and an empty result falls back to the
+       normal title rather than leaving the browser with nothing to name. */
+    const printFileName = computed(() => {
+      const name = String(statementNo.value || "").replace(/[\\/:*?"<>|]+/g, "").trim();
+      return name || title.value;
+    });
+
+    window.addEventListener("beforeprint", () => { document.title = printFileName.value; });
+    window.addEventListener("afterprint", () => { document.title = title.value; });
 
     return {
       data, setting, info, cssVars, storageError,
