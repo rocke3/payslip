@@ -1,139 +1,79 @@
-# Payslip Generator
+# Contractor Payment Statement Generator
 
-An interactive, in-browser payslip generator built with Nuxt and Vue. It provides a clean, printable layout where every field is inline-editable, color theme is adjustable, and totals are calculated automatically.
+An interactive, in-browser generator for a **Monthly Contractor Payment Statement**
+(payslip / payment record) in a **single HTML file**. Every field is inline-editable, the
+color theme is adjustable, and totals are calculated automatically. There is no build step,
+no install, and no server — open `index.html` and start editing.
+
+The document covers one monthly compensation period and records the individual payment
+installments made against it, including installments settled in the following calendar
+month. It is designed to print as a single A4 page.
+
+![Preview](preview.png)
 
 ## Features
 
-- **Inline Editing**: Click any text or number to edit in place via `app/components/Editable.vue`.
-- **Earnings Table**: Add/remove earning rows, with automatic total computation.
-- **Theming Controls**: Live primary/secondary/border color pickers and a Settings panel.
-- **Print-Ready**: Optimized print stylesheet and one-click print button.
-- **Tooltips & UX**: Helpful tooltips and keyboard shortcut to toggle settings.
-- **Zero backend**: All data is client-side; perfect for quick exports and demos.
-
-## Tech Stack
-
-- **Nuxt** (v4) with Vue 3
-- **@nuxt/ui** for ready-to-use UI components
-- **TypeScript**
-
-See `package.json` for exact versions.
-
-## Project Structure
-
-- `app/pages/index.vue`: Main payslip UI (form, table, theme controls, print logic)
-- `app/components/Editable.vue`: Content-editable component with number parsing/formatting
-- `app/components/Tooltip.vue`: Wrapper over `UTooltip` for consistent tooltips
-- `nuxt.config.ts`: Nuxt configuration (modules, global CSS, app head)
-- `assets/css/main.css`: Global styles (referenced by Nuxt config)
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js (LTS recommended)
-- pnpm, npm, or yarn
-
-### Install
-
-```bash
-# with pnpm
-pnpm install
-
-# or npm
-npm install
-
-# or yarn
-yarn
-```
-
-### Development
-
-```bash
-# start dev server
-pnpm dev
-# or
-npm run dev
-# or
-yarn dev
-```
-
-The dev server URL will be printed in the terminal (typically http://localhost:3000).
-
-### Production
-
-```bash
-# build for production
-pnpm build
-# preview the production build locally
-pnpm preview
-
-# optional: generate a static site (dist/)
-pnpm generate
-```
-
-Equivalent `npm run`/`yarn` scripts are defined in `package.json`.
+- **Inline Editing**: Click any text or number to edit it in place.
+- **Compensation & Withholdings**: Add/remove rows, with automatic totals.
+- **Payment Details**: One row per installment (date, amount, method) with a Total Paid
+  that is reconciled against the compensation payable; mismatches and missing payment
+  dates are flagged on screen only.
+- **Derived Values**: The payment period (full month), the statement number
+  (`PCS-YYYY-MM`) and the payment-schedule note are generated from the selected month and
+  the configured compensation, so they cannot go stale.
+- **Payment Period Formats**: Full contract month (default), date range, single date, or
+  month & year only.
+- **Account Masking**: The bank account number prints as `XXXX XXXX 1234`; toggle it off
+  in Settings to edit the stored number.
+- **Theming**: Live primary/secondary/border color pickers, 7 fonts, dark mode.
+- **Logo Upload**: Upload and crop a company logo (stored as a data URI).
+- **Print-Ready**: A4 print stylesheet and one-click print / save as PDF.
+- **Persistence**: Everything is saved to `localStorage`, with JSON export/import.
+- **Zero backend**: All data stays in your browser.
 
 ## Usage
 
-1. Open the app in the browser.
-2. Click on any field (company, dates, employee, bank, notes, table cells) to edit. Changes apply on blur.
-3. Use the floating color pickers or the Settings panel to adjust colors.
-4. Add new earning rows with “Add Earning Row”; remove with the trash icon.
-5. Click the printer button to print/export as PDF.
+Open `index.html` in any modern browser — double-clicking the file works.
 
-### Keyboard Shortcuts
+To serve it locally instead (useful if your browser restricts `file://`):
 
-- **o**: Toggle the Settings panel.
+```bash
+python3 -m http.server 4173
+```
 
-## Customization
+Then visit http://localhost:4173/index.html.
 
-- Edit initial data in `app/pages/index.vue` (company details, labels, table headers, defaults).
-- Update UI text by editing the corresponding `Editable` bindings.
-- Adjust global styles in `assets/css/main.css` and component-scoped styles in `index.vue`.
-- Theme via CSS variables bound in `index.vue`: `--theme-primary`, `--theme-secondary`, `--theme-border`.
+1. Click any field (company, dates, contractor, bank, notes, table cells) to edit. Changes apply on blur.
+2. Use the floating color pickers or the Settings panel to adjust the theme.
+3. Add rows with "Add Compensation Row" / "Add Withholding Row" / "Add Installment"; remove with the trash icon.
+4. Click the printer button to print or export as PDF.
 
-## Printing and Export
+## Structure
 
-- The layout uses a print stylesheet to hide interactive controls (`.no-print`) and optimize margins.
-- Use your browser’s “Save as PDF” from the print dialog for digital copies.
+`index.html` is fully self-contained: markup, styles, and a Vue 3 app defined with
+`x-template` blocks, all in one file. The favicon and default logo are inlined as data
+URIs. Only these are loaded from a CDN:
 
-## Scripts
+- Vue 3 (global build)
+- Tailwind CSS (play CDN)
+- Cropper.js (logo cropping)
+- Iconify (icons)
+- Google Fonts
 
-- `dev`: Start Nuxt dev server
-- `build`: Build for production
-- `generate`: Generate static site to `dist/`
-- `preview`: Preview production build
-- `postinstall`: Nuxt prepare
+Because of the CDN dependencies the page needs a network connection on first load.
 
 ## Deployment
 
-You can deploy with any static host or Node host:
+Upload `index.html` to any static host — Netlify, Vercel, GitHub Pages, S3, or a plain
+web server. No build command, no publish directory configuration.
 
-- **Static (recommended)**: `pnpm generate` then upload `dist/` to Netlify, Vercel (static), GitHub Pages, etc.
-- **Node runtime**: Use `pnpm build` and run with a Node adapter or your hosting provider’s Nuxt support.
+## Data & Privacy
 
-For Netlify/Vercel:
-
-- Build command: `pnpm generate`
-- Publish directory: `dist`
-
-## Notes on Data & Privacy
-
-- No server is used; data lives in the page while it’s open. Printing/export creates your local PDF.
-- If you need persistence, integrate localStorage or a backend API to save/load templates.
-
-## Roadmap Ideas
-
-- Deductions and tax sections with summaries
-- Multi-currency and locale-aware formatting
-- Template presets and export/import of JSON
-- Logo upload and image cropping
-
-## Troubleshooting
-
-- If UI components are missing styles, ensure dependencies are installed and the dev server restarted.
-- Validate that `nuxt.config.ts` lists modules and global CSS as expected.
+- No server is used. Data lives in your browser's `localStorage` for the page's origin.
+- Use **Export JSON** in Settings to back up your data, and **Import JSON** to restore it.
+- Documents saved by earlier versions are migrated to the contractor-statement structure on
+  load; entered values (names, amounts, bank details) are preserved.
+- **Reset Data** clears saved values and reloads the defaults.
 
 ## License
 
