@@ -209,6 +209,7 @@
     ref="el"
     class="editable-field px-1 -mx-1 transition-colors duration-200 outline-none"
     contenteditable
+    @input="onInput"
     @blur="onBlur"
   ></component>
 </script>
@@ -673,6 +674,13 @@
         </div>
       </transition>
 
+      <div v-if="storageError" class="no-print fixed bottom-3 left-1/2 -translate-x-1/2 z-[95] max-w-lg w-[calc(100%-1.5rem)]">
+        <div class="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 shadow-lg">
+          <iconify-icon icon="lucide:triangle-alert" class="size-4 text-red-500 mt-0.5 shrink-0"></iconify-icon>
+          <p class="text-sm text-red-700">{{ storageError }}</p>
+        </div>
+      </div>
+
       <div class="no-print">
         <app-settings></app-settings>
       </div>
@@ -1062,6 +1070,11 @@ const fromISODate = (isoStr) => {
 
 const STORAGE_KEYS = ["payslipData", "setting"];
 
+/* A failed write means the document on screen no longer matches what will come
+   back on reload, so it is surfaced instead of being swallowed: the usual cause
+   is the 5MB quota (a large logo) or a private window that blocks storage. */
+const storageError = ref("");
+
 /* `migrate` runs on the raw saved object *before* it is merged over the
    defaults: an old document has no `statement`/`contractor`/`payments` keys,
    so merging first would silently leave the sample values in place. */
@@ -1078,7 +1091,14 @@ function persisted(key, defaults, migrate) {
   } catch (e) { /* ignore malformed storage */ }
 
   watch(state, (val) => {
-    try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) { /* quota / private mode */ }
+    try {
+      localStorage.setItem(key, JSON.stringify(val));
+      storageError.value = "";
+    } catch (e) {
+      storageError.value = /quota|exceeded/i.test(String(e && e.name) + String(e && e.message))
+        ? "Changes are not being saved: browser storage is full. A smaller logo image usually frees enough space. Export your JSON now to avoid losing work."
+        : "Changes are not being saved: this browser is blocking local storage (private browsing?). Export your JSON to keep your work.";
+    }
   }, { deep: true });
 
   return state;
@@ -1094,6 +1114,17 @@ const DEFAULT_INSTALLMENTS = 2;
    the user actually entered (names, amounts, bank details, wording) are carried
    over verbatim; only labels, terminology and containers are migrated. */
 function migrateStatementData(d) {
+  /* Every load runs this function, so any rule that *rewrites* a value the user
+     could legitimately have typed has to be one-shot: without the marker the
+     document is re-migrated on each reload and the edit silently disappears.
+     Rules that only add missing keys are safe to repeat and stay ungated. */
+  const done = d.migrations || (d.migrations = {});
+  /* Terminology fixes (payslip/employee wording, legacy row names, columns that
+     were renamed) describe the *shipped* defaults of an older version. Once
+     they have run, the same text typed on purpose is the user's, not a
+     leftover, so these rules fire exactly once per document. */
+  const relabel = !done.terminology;
+
   /* payslip -> statement */
   if (d.payslip && !d.statement) {
     const old = d.payslip;
@@ -1117,17 +1148,19 @@ function migrateStatementData(d) {
     delete s.subtitle;
     if (!s.number) s.number = { title: "Statement No", value: "", prefix: "PCS" };
     if (!s.number.prefix) s.number.prefix = "PCS";
-    if (s.number.title === "Payslip No") s.number.title = "Statement No";
+    if (relabel && s.number.title === "Payslip No") s.number.title = "Statement No";
     /* the old number was a bare month; the statement number is derived now */
-    if (/^\d{4}-\d{2}$/.test(s.number.value || "")) s.number.value = "";
+    if (relabel && /^\d{4}-\d{2}$/.test(s.number.value || "")) s.number.value = "";
     if (!s.issued) s.issued = { title: "Statement Date", date: formatToday() };
     if (!s.period) s.period = { title: "Payment Period", month: currentPeriodMonth(), start: "", end: "" };
     if (!s.period.month) s.period.month = monthOfDateStr(s.period.start) || currentPeriodMonth();
     if (!s.net) s.net = { title: "Total Paid" };
-    if (/^(net pay|net salary)$/i.test(s.net.title || "")) s.net.title = "Total Paid";
-    if (/payslip/i.test(s.title || "")) s.title = "Monthly Contractor Payment Statement";
-    if (/^pay period$/i.test(s.period.title || "")) s.period.title = "Payment Period";
-    if (/^(pay|invoice) date$/i.test(s.issued.title || "")) s.issued.title = "Statement Date";
+    if (relabel) {
+      if (/^(net pay|net salary)$/i.test(s.net.title || "")) s.net.title = "Total Paid";
+      if (/payslip/i.test(s.title || "")) s.title = "Monthly Contractor Payment Statement";
+      if (/^pay period$/i.test(s.period.title || "")) s.period.title = "Payment Period";
+      if (/^(pay|invoice) date$/i.test(s.issued.title || "")) s.issued.title = "Statement Date";
+    }
   }
 
   /* employee -> contractor */
@@ -1150,46 +1183,51 @@ function migrateStatementData(d) {
 
   const c = d.contractor;
   if (c) {
-    if (/employee/i.test(c.title || "") || !c.title) c.title = "Contractor Information";
+    if (!c.title || (relabel && /employee/i.test(c.title))) c.title = "Contractor Information";
     if (!Array.isArray(c.data)) c.data = [];
-    if (!c.data.some((f) => /^status$/i.test(f.label || ""))) {
+    /* only seeded once: a deleted row must stay deleted */
+    if (relabel && !c.data.some((f) => /^status$/i.test(f.label || ""))) {
       c.data.push({ label: "Status", value: "Independent Contractor" });
     }
   }
 
   /* bank */
   if (d.bank) {
-    if (/^bank details$/i.test(d.bank.title || "")) d.bank.title = "Payment & Bank Details";
+    if (relabel && /^bank details$/i.test(d.bank.title || "")) d.bank.title = "Payment & Bank Details";
     for (const row of d.bank.data || []) {
       if (row.mask === undefined && /account\s*(no|number)/i.test(row.label || "")) row.mask = true;
     }
-    if (!(d.bank.data || []).some((r) => /payment method/i.test(r.label || ""))) {
+    if (relabel && !(d.bank.data || []).some((r) => /payment method/i.test(r.label || ""))) {
       (d.bank.data || []).push({ label: "Payment Method", value: "International Bank Transfer" });
     }
   }
 
   /* compensation */
   const e = d.earning;
-  if (e) {
+  if (e && relabel) {
     /* col4 used to be a stale leftover column and was dropped here; it now
        holds the YTD header, so an edited label must survive a reload. */
     if (/earnings/i.test(e.title || "")) e.title = "Compensation";
     if (/^earnings$/i.test(e.col1 || "")) e.col1 = "Description";
     if (/^total earnings$/i.test(e.total || "")) e.total = "Total Compensation";
   }
-  for (const row of d.earnings || []) {
-    if (/^base salary/i.test(row.name || "")) row.name = "Monthly Contract Compensation";
+  if (relabel) {
+    for (const row of d.earnings || []) {
+      if (/^base salary/i.test(row.name || "")) row.name = "Monthly Contract Compensation";
+    }
   }
 
   /* withholdings */
   const dd = d.deduction;
   if (dd) {
     if (!dd.col3) { dd.col3 = dd.col2 || "Amount"; dd.col2 = "Hours"; }
-    if (/deductions/i.test(dd.title || "")) dd.title = "Withholdings";
-    if (/^(deductions|withholdings)$/i.test(dd.col1 || "")) dd.col1 = "Description";
-    if (/^total deductions$/i.test(dd.total || "")) dd.total = "Total Withholdings";
+    if (relabel) {
+      if (/deductions/i.test(dd.title || "")) dd.title = "Withholdings";
+      if (/^(deductions|withholdings)$/i.test(dd.col1 || "")) dd.col1 = "Description";
+      if (/^total deductions$/i.test(dd.total || "")) dd.total = "Total Withholdings";
+    }
   }
-  if (Array.isArray(d.deductions)) {
+  if (Array.isArray(d.deductions) && relabel) {
     /* employee-only categories are dropped only when they carry no amount, so
        a figure that was actually withheld is never silently deleted */
     d.deductions = d.deductions.filter(
@@ -1203,9 +1241,12 @@ function migrateStatementData(d) {
     }
   }
 
-  for (const row of [...(d.earnings || []), ...(d.deductions || [])]) {
-    delete row.ytd;
-    delete row.ytdPrev;
+  for (const row of [...(d.earnings || []), ...(d.deductions || [])]) delete row.ytdPrev;
+  /* The employee-schema YTD totals were meaningless for a contractor document
+     and were cleared once; per-row YTD is user-entered now and must survive. */
+  if (!done.ytdCleared) {
+    for (const row of [...(d.earnings || []), ...(d.deductions || [])]) delete row.ytd;
+    done.ytdCleared = true;
   }
 
   /* payment details: seeded from the compensation actually on the document,
@@ -1229,11 +1270,11 @@ function migrateStatementData(d) {
   }
   delete d.payments.scheduleTemplate;
   /* the column now reads "Payment"; the rows themselves are renamed at runtime */
-  if (d.payments.col1 === "Installment") d.payments.col1 = "Payment";
+  if (relabel && d.payments.col1 === "Installment") d.payments.col1 = "Payment";
 
   /* YTD is a later addition: label the column and give existing rows a value
      so the inputs bind to a number rather than undefined. */
-  if (d.earning && !d.earning.col4) d.earning.col4 = "YTD";
+  if (d.earning && d.earning.col4 === undefined) d.earning.col4 = "YTD";
   if (d.deduction) delete d.deduction.col4;
   if (Array.isArray(d.earnings)) d.earnings.forEach((row) => { if (row.ytd === undefined) row.ytd = 0; });
   if (Array.isArray(d.deductions)) d.deductions.forEach((row) => { delete row.ytd; });
@@ -1242,26 +1283,31 @@ function migrateStatementData(d) {
      the generated schedule note, so drop it only while it is still the shipped
      default and keep anything the user wrote */
   if (!d.note) d.note = {};
-  if (!d.note.title || /^notes$/i.test(d.note.title)) d.note.title = "Payment Notes";
+  if (!d.note.title || (relabel && /^notes$/i.test(d.note.title))) d.note.title = "Payment Notes";
   if (d.note.tax === undefined) {
     d.note.tax = "No taxes or other deductions are withheld by the Company. The Contractor is responsible for applicable taxes and statutory obligations in their country of residence.";
   }
-  if (typeof d.note.content === "string" && /base salary:|semi-monthly|bi-weekly|health insurance premium/i.test(d.note.content)) {
+  if (relabel && typeof d.note.content === "string" && /base salary:|semi-monthly|bi-weekly|health insurance premium/i.test(d.note.content)) {
     d.note.content = "";
   }
 
   /* issued by: the oldest documents packed "Name, Position" into one field and
      the position is no longer shown, so keep the name and drop the rest. */
   if (d.issuedBy) {
-    if (d.issuedBy.position === undefined) {
-      d.issuedBy.name = String(d.issuedBy.name || "").split(",")[0].trim();
+    if (!done.issuedByName) {
+      if (d.issuedBy.position === undefined) {
+        d.issuedBy.name = String(d.issuedBy.name || "").split(",")[0].trim();
+      }
+      done.issuedByName = true;
     }
     delete d.issuedBy.position;
   }
 
-  if (typeof d.footer === "string" && /payslip|employee/i.test(d.footer)) {
+  if (relabel && typeof d.footer === "string" && /payslip|employee/i.test(d.footer)) {
     d.footer = d.footer.replace(/payslip/gi, "document").replace(/employee/gi, "contractor");
   }
+
+  done.terminology = true;
 
   return d;
 }
@@ -1415,7 +1461,11 @@ const importData = () => {
 
 /* --------------------------------------------------------- dark mode */
 
-const colorMode = ref(localStorage.getItem("colorMode") || "light");
+const readStored = (key) => {
+  try { return localStorage.getItem(key); } catch (e) { return null; } // private mode / blocked storage
+};
+
+const colorMode = ref(readStored("colorMode") || "light");
 watchEffect(() => {
   document.documentElement.classList.toggle("dark", colorMode.value === "dark");
   try { localStorage.setItem("colorMode", colorMode.value); } catch (e) {}
@@ -1459,26 +1509,42 @@ const Editable = {
       }
     };
 
-    const onBlur = () => {
+    /* Edits are committed on every keystroke, not just on blur, so a reload,
+       a print dialog or a closed tab never drops what was typed. `lastEmitted`
+       lets the incoming-value watcher tell our own echo apart from a genuine
+       outside change: rewriting textContent mid-typing would reset the caret. */
+    let lastEmitted;
+
+    const commit = (final) => {
       const node = el.value && el.value.$el ? el.value.$el : el.value;
       if (!node) return;
 
       let value = (node.textContent || "").trim();
 
       if (props.type === "number") {
-        if (value === "") return;
+        // An empty box mid-edit is someone clearing the field to retype; only
+        // settle it to 0 once they leave.
+        if (value === "" && !final) return;
         const parsed = parseFloat(value.replace(/[^0-9.-]+/g, ""));
         value = isNaN(parsed) ? 0 : parsed;
-        node.textContent = formatNumber(value);
+        // Reformatting while typing would fight the caret, so only on blur.
+        if (final) node.textContent = formatNumber(value);
       }
 
+      lastEmitted = value;
       emit("update:modelValue", value);
     };
 
-    onMounted(() => updateElement(props.modelValue));
-    watch(() => props.modelValue, (v) => updateElement(v));
+    const onInput = () => commit(false);
+    const onBlur = () => commit(true);
 
-    return { el, onBlur };
+    onMounted(() => updateElement(props.modelValue));
+    watch(() => props.modelValue, (v) => {
+      if (v === lastEmitted) return;
+      updateElement(v);
+    });
+
+    return { el, onInput, onBlur };
   },
 };
 
@@ -1871,7 +1937,7 @@ const App = {
     watchEffect(() => { document.title = title.value; });
 
     return {
-      data, setting, info, cssVars,
+      data, setting, info, cssVars, storageError,
       earning, deduction, earningYtd, rowYtd, ytdMonths, netCompensation, totalPaid,
       formatCurrency, formatAmount, toISODate, toISOMonth,
       contractPeriodText, statementNo, setStatementNo,
