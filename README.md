@@ -18,9 +18,12 @@ month. It is designed to print as a single A4 page.
 - **Payment Details**: One row per installment (date, amount, method) with a Total Paid
   that is reconciled against the compensation payable; mismatches and missing payment
   dates are flagged on screen only.
-- **Derived Values**: The payment period (full month), the statement number
-  (`PCS-YYYY-MM`) and the payment-schedule note are generated from the selected month and
-  the configured compensation, so they cannot go stale.
+- **Derived Values**: The payment period, the statement number (the contractor's initials
+  plus `YYYYMM`, e.g. `JS202609`) and the installment row names (`September Payment #1`)
+  follow the selected period, so they cannot go stale. In full-contract-month mode,
+  changing the month also sets the statement date to the 3rd of the following month and
+  the first two installments to the 16th of the period month and the 2nd of the following
+  month. A statement number or row name you type yourself is kept as written.
 - **Payment Period Formats**: Full contract month (default), date range, single date, or
   month & year only.
 - **Account Masking**: The bank account number prints as `XXXX XXXX 1234`; toggle it off

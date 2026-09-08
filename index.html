@@ -923,7 +923,7 @@
                       <td class="tblCol"><editable v-model="item.name" class="font-medium text-slate-700 w-full"></editable></td>
                       <td class="tblCol">
                         <div class="flex items-center gap-1">
-                          <editable v-model="item.date" display-value="—" class="w-full"></editable>
+                          <editable v-model="item.date" class="w-full"></editable>
                           <input type="date" :value="toISODate(item.date)" class="no-print date-picker" @input="onInstallmentDateChange(index, $event)">
                         </div>
                       </td>
@@ -1020,7 +1020,6 @@ const DEFAULT_LOGO = "data:image/svg+xml;utf8," + encodeURIComponent(
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const MONTHS_LONG = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-const MONTH_NUM = { Jan: "01", Feb: "02", Mar: "03", Apr: "04", May: "05", Jun: "06", Jul: "07", Aug: "08", Sep: "09", Oct: "10", Nov: "11", Dec: "12" };
 
 /* Accepts both the short ("01 Aug 2026") and long ("01 August 2026") forms so
    documents saved under either spelling keep working with the date pickers. */
@@ -1483,7 +1482,6 @@ const Editable = {
     modelValue: { type: [String, Number], default: undefined },
     as: { type: String, default: "p" },
     type: { type: String, default: "text" },
-    displayValue: { type: String, default: undefined },
   },
   emits: ["update:modelValue"],
   setup(props, { emit }) {
@@ -1507,7 +1505,10 @@ const Editable = {
         const n = Number(val);
         node.textContent = !isNaN(n) ? formatNumber(n) : "";
       } else {
-        node.textContent = val != null ? val : (props.displayValue != null ? props.displayValue : "");
+        /* An empty field stays genuinely empty: the "—" a reader sees is drawn
+           by `.editable-field:empty::before`, so it can never be picked up by
+           `commit` and stored as if it were the value. */
+        node.textContent = val != null ? val : "";
       }
     };
 
@@ -1725,10 +1726,19 @@ const App = {
 
     /* ----------------------------------------------------- pay period */
 
-    // The compensation period is always the whole selected month; the second
-    // installment landing in the following month does not move it.
+    /* The compensation period is always a whole month; the second installment
+       landing in the following month does not move it.
+
+       Only the contract-month mode edits `period.month` directly — every other
+       mode edits the period text — so the source has to follow the mode, or the
+       statement number, the payment row names, the YTD month count and the
+       document title all keep reporting the month that was last picked in
+       contract-month mode. */
     const periodParts = computed(() => {
-      const [yearStr, monthStr] = String(data.statement.period.month || "").split("-");
+      const periodMonth = setting.payPeriodMode === "contractMonth"
+        ? data.statement.period.month
+        : (monthOfDateStr(data.statement.period.start) || data.statement.period.month);
+      const [yearStr, monthStr] = String(periodMonth || "").split("-");
       const year = parseInt(yearStr, 10);
       const month = parseInt(monthStr, 10);
       if (!year || !month) return null;
@@ -1758,6 +1768,7 @@ const App = {
     // Keep the plain start/end strings in step with the selected month so the
     // other period modes (and exported JSON) stay coherent.
     watch(() => data.statement.period.month, (month) => {
+      if (setting.payPeriodMode !== "contractMonth") return;
       const p = periodParts.value;
       if (!month || !p) return;
       const mm = String(p.month).padStart(2, "0");
@@ -1768,6 +1779,26 @@ const App = {
     const onContractMonthChange = (e) => {
       if (e.target.value) data.statement.period.month = e.target.value;
     };
+
+    /* Dates that hang off the selected period: the statement is issued on the
+       3rd of the following month, the first payment lands on the 16th of the
+       period month and the second on the 2nd of the following month. Extra
+       rows keep whatever date they were given. Only fires when the period is
+       actually changed, so a saved document opens with its own dates intact. */
+    const nextMonthOf = ({ year, month }) => (month === 12 ? { year: year + 1, month: 1 } : { year, month: month + 1 });
+
+    const applyPeriodDates = () => {
+      const p = periodParts.value;
+      if (!p) return;
+      const next = nextMonthOf(p);
+      const iso = (d, day) => `${d.year}-${String(d.month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+      data.statement.issued.date = fromISODate(iso(next, 3));
+      const rows = data.payments.rows;
+      if (rows[0]) rows[0].date = fromISODate(iso(p, 16));
+      if (rows[1]) rows[1].date = fromISODate(iso(next, 2));
+    };
+
+    watch(() => data.statement.period.month, applyPeriodDates);
 
     const onPeriodStartChange = (e) => {
       if (e.target.value) data.statement.period.start = fromISODate(e.target.value);
@@ -1799,6 +1830,13 @@ const App = {
 
     // Keep the stored period text in a shape that matches the selected mode.
     watch(() => setting.payPeriodMode, (mode) => {
+      /* Contract-month mode reads `period.month`, so hand the month the other
+         modes were showing back to it; without this, switching into contract
+         month silently reverts the document to an older period. */
+      if (mode === "contractMonth") {
+        const month = monthOfDateStr(data.statement.period.start);
+        if (month) data.statement.period.month = month;
+      }
       const parts = String(data.statement.period.start || "").trim().split(/\s+/);
       if (mode === "month" && parts.length === 3) {
         data.statement.period.start = `${parts[1]} ${parts[2]}`;
@@ -1864,7 +1902,11 @@ const App = {
       });
     };
 
-    watch(() => [data.statement.period.month, data.payments.rows.length], renamePayments, { immediate: true });
+    watch(
+      () => [periodParts.value ? periodParts.value.month : 0, data.payments.rows.length],
+      renamePayments,
+      { immediate: true },
+    );
 
     const addInstallmentRow = () => {
       const rows = data.payments.rows;
