@@ -1653,8 +1653,40 @@ const ImageCropper = {
 
     const cropImage = () => {
       if (!cropper) return;
-      const canvas = cropper.getCroppedCanvas();
-      cropImg.value = canvas.toDataURL();
+      const MAX_W = 250;
+      /* If the user hasn't cropped, rotated, or scaled, and the source is
+         already small enough, keep the original bytes — round-tripping through
+         canvas.toDataURL decompresses and re-encodes the JPEG, inflating it. */
+      const imgData = cropper.getImageData();
+      const cropBox = cropper.getData();
+      const untouched =
+        Math.abs(cropBox.rotate || 0) < 0.01 &&
+        Math.abs(cropBox.scaleX || 1) === 1 &&
+        Math.abs(cropBox.scaleY || 1) === 1 &&
+        Math.abs(cropBox.x) < 1 &&
+        Math.abs(cropBox.y) < 1 &&
+        Math.abs(cropBox.width - imgData.naturalWidth) < 1 &&
+        Math.abs(cropBox.height - imgData.naturalHeight) < 1;
+
+      if (untouched && imgData.naturalWidth <= MAX_W && typeof imgSrc.value === "string" && imgSrc.value.startsWith("data:")) {
+        cropImg.value = imgSrc.value;
+        emit("update:modelValue", cropImg.value);
+        close();
+        return;
+      }
+
+      const src = cropper.getCroppedCanvas();
+      let out = src;
+      if (src.width > MAX_W) {
+        const scale = MAX_W / src.width;
+        out = document.createElement("canvas");
+        out.width = MAX_W;
+        out.height = Math.round(src.height * scale);
+        const ctx = out.getContext("2d");
+        ctx.imageSmoothingQuality = "high";
+        ctx.drawImage(src, 0, 0, out.width, out.height);
+      }
+      cropImg.value = out.toDataURL("image/jpeg", 0.9);
       emit("update:modelValue", cropImg.value);
       close();
     };
@@ -1980,8 +2012,8 @@ const App = {
       const raw = String(value || "").trim();
       if (/[X*•]/i.test(raw)) return raw; // already masked in the stored data
       const digits = raw.replace(/\D/g, "");
-      if (digits.length <= 4) return raw;
-      return `XXXX XXXX ${digits.slice(-4)}`;
+      if (digits.length <= 8) return raw;
+      return `${digits.slice(0, 4)} XXXXX ${digits.slice(-4)}`;
     };
 
     /* --------------------------------------------------------------- rows */
